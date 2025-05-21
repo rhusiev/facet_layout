@@ -1,14 +1,94 @@
 #include QMK_KEYBOARD_H
-#if __has_include("keymap.h")
-#    include "keymap.h"
-#endif
+
+enum td_keycodes {
+    MO1_LGUI
+};
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_TAP
+} td_state_t;
+
+typedef struct {
+    bool is_press_action;
+    td_state_t state;
+} td_tap_t;
+
+td_state_t cur_dance(tap_dance_state_t *state);
+void mo1_lgui_finished(tap_dance_state_t *state, void *user_data);
+void mo1_lgui_reset(tap_dance_state_t *state, void *user_data);
+
+td_state_t cur_dance(tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (!state->pressed) return TD_SINGLE_TAP;
+        else return TD_SINGLE_HOLD;
+    } else if (state->count == 2) return TD_DOUBLE_TAP;
+    else return TD_UNKNOWN;
+}
+
+static td_tap_t mo1_lgui_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+
+void mo1_lgui_finished(tap_dance_state_t *state, void *user_data) {
+    mo1_lgui_tap_state.state = cur_dance(state);
+
+    switch (mo1_lgui_tap_state.state) {
+        case TD_SINGLE_TAP:
+            layer_on(1);
+            break;
+        case TD_SINGLE_HOLD:
+            layer_on(1);
+            break;
+        case TD_DOUBLE_TAP:
+            register_code(KC_LGUI);
+            break;
+        default:
+            break;
+    }
+}
+
+void mo1_lgui_reset(tap_dance_state_t *state, void *user_data) {
+    switch (mo1_lgui_tap_state.state) {
+        case TD_SINGLE_TAP:
+            layer_off(1);
+            break;
+        case TD_SINGLE_HOLD:
+            layer_off(1);
+            break;
+        case TD_DOUBLE_TAP:
+            unregister_code(KC_LGUI);
+            break;
+        default:
+            break;
+    }
+    mo1_lgui_tap_state.state = TD_NONE;
+}
+
+tap_dance_action_t tap_dance_actions[] = {
+    [MO1_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo1_lgui_finished, mo1_lgui_reset)
+};
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
+            return 275;
+        default:
+            return TAPPING_TERM;
+    }
+}
+
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_split_3x6_3(
-        KC_TAB,  KC_F, KC_P, KC_D,    KC_L,          KC_X,    /**/  RCTL_T(KC_ENT),  KC_U,           KC_O,    KC_Y,   KC_B,    KC_Z,
-        KC_ESC,  KC_S, KC_N, KC_T,    KC_H,          KC_K,    /**/  LCTL(KC_BSPC),   KC_A,           KC_E,    KC_I,   KC_C,    KC_Q,
-        KC_LSFT, KC_V, KC_W, KC_G,    KC_M,          KC_J,    /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT), KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
-                             KC_LALT, LT(1,KC_LGUI), KC_LCTL, /**/  KC_R,            LT(2,KC_SPC),   OSL(10)
+        KC_TAB,  KC_F, KC_P, KC_D,    KC_L,           KC_X,    /**/  RCTL_T(KC_ENT),  KC_U,           KC_O,    KC_Y,   KC_B,    KC_Z,
+        KC_ESC,  KC_S, KC_N, KC_T,    KC_H,           KC_K,    /**/  LCTL(KC_BSPC),   KC_A,           KC_E,    KC_I,   KC_C,    KC_Q,
+        KC_LSFT, KC_V, KC_W, KC_G,    KC_M,           KC_J,    /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT), KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
+                             KC_LALT, TD(MO1_LGUI), KC_LCTL,   /**/  KC_R,            LT(2,KC_SPC),   OSL(10)
     ),
     [1] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ LSFT(KC_ENT),  LSFT(KC_U), LSFT(KC_O),    LSFT(KC_Y), LSFT(KC_B),    LSFT(KC_Z),
