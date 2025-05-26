@@ -20,39 +20,47 @@
 #define HOT_UA 2*2*2*2
 
 enum custom_keycodes {
-    DF_EN_LGUISP = SAFE_RANGE,
-    DF_QW_LGUISP,
-    DF_UA_LGUISP
+    DFEN_LGUISP = SAFE_RANGE,
+    DFQW_LGUISP,
+    DFUA_LGUISP
 };
+void switch_en(void) {
+    SEND_STRING(SS_LALT(SS_LCTL("1")));
+}
+void switch_ua(void) {
+    SEND_STRING(SS_LALT(SS_LCTL("2")));
+}
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        case DF_EN_LGUISP:
+        case DFEN_LGUISP:
             if (record->event.pressed) {
-                if (default_layer_state != HOT_EN && default_layer_state != HOT_QW) {
-                    register_code(KC_LEFT_GUI);
-                    register_code(KC_SPC);
-                    unregister_code(KC_LEFT_GUI);
-                    unregister_code(KC_SPC);
-                }
+                switch_en();
+                // if (default_layer_state != HOT_EN && default_layer_state != HOT_QW) {
+                //     register_code(KC_LEFT_GUI);
+                //     register_code(KC_SPC);
+                //     unregister_code(KC_LEFT_GUI);
+                //     unregister_code(KC_SPC);
+                // }
                 set_single_default_layer(L_EN);
             } else {
                 unregister_code(KC_LEFT_GUI);
                 unregister_code(KC_SPC);
             }
             return false;
-        case DF_QW_LGUISP:
+        case DFQW_LGUISP:
             if (record->event.pressed) {
                 set_single_default_layer(L_QW);
             }
             return false;
-        case DF_UA_LGUISP:
+        case DFUA_LGUISP:
             if (record->event.pressed) {
-                if (default_layer_state != HOT_UA && default_layer_state != HOT_QW) {
-                    register_code(KC_LEFT_GUI);
-                    register_code(KC_SPC);
-                    unregister_code(KC_LEFT_GUI);
-                    unregister_code(KC_SPC);
-                }
+                switch_ua();
+                // if (default_layer_state != HOT_UA && default_layer_state != HOT_QW) {
+                //     register_code(KC_LEFT_GUI);
+                //     register_code(KC_SPC);
+                //     unregister_code(KC_LEFT_GUI);
+                //     unregister_code(KC_SPC);
+                // }
                 set_single_default_layer(L_UA);
             } else {
                 unregister_code(KC_LEFT_GUI);
@@ -63,9 +71,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
+layer_state_t layer_state_set_user(layer_state_t state) {
+    static uint8_t last_layer = L_EN;
+    uint8_t layer = get_highest_layer(state);
+    if (default_layer_state == HOT_UA) {
+        if (layer == L_SYMBOL) {
+            switch_en();
+        } else if (last_layer == L_SYMBOL) {
+            switch_ua();
+        }
+    }
+    last_layer = layer;
+    return state;
+}
+
 enum td_keycodes {
-    MO_ENSPECIAL_LGUI,
-    MO_UASPECIAL_LGUI
+    MOENSPECIAL_LGUI,
+    MOUASPECIAL_LGUI
 };
 typedef enum {
     TD_NONE,
@@ -168,8 +190,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [MO_ENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_enlsh_lgui_finished, mo_enlsh_lgui_reset),
-    [MO_UASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_ualsh_lgui_finished, mo_ualsh_lgui_reset)
+    [MOENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_enlsh_lgui_finished, mo_enlsh_lgui_reset),
+    [MOUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_ualsh_lgui_finished, mo_ualsh_lgui_reset)
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -177,7 +199,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_F, KC_P, KC_D,    KC_L,                  KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
         KC_ESC,  KC_S, KC_N, KC_T,    KC_H,                  KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
         KC_LSFT, KC_V, KC_W, KC_G,    KC_M,                  KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
-                             KC_LALT, TD(MO_ENSPECIAL_LGUI), KC_LCTL,  /**/  KC_R,            LT(L_EN_SH,KC_SPC), OSL(L_SYMBOL)
+                             KC_LALT, TD(MOENSPECIAL_LGUI), KC_LCTL,  /**/  KC_R,            LT(L_EN_SH,KC_SPC), OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
@@ -201,7 +223,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_LBRC, KC_U, KC_V,      KC_W,                  KC_I,      /**/ RCTL_T(KC_ENT), KC_E,               KC_J,   KC_B, KC_Q,    KC_SCLN,
         KC_ESC,  KC_K,    KC_Y, KC_R,      KC_N,                  KC_L,      /**/ LCTL(KC_BSPC),  KC_F,               KC_T,   KC_S, KC_C,    KC_M,
         KC_LSFT, KC_X,    KC_G, KC_D,      KC_P,                  KC_COMM,   /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_GRV, KC_Z, KC_RBRC, KC_A,
-                                MO(L_ALT), TD(MO_UASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
+                                MO(L_ALT), TD(MOUASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), LSFT(KC_DOT), KC_NO,
@@ -252,8 +274,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                    KC_LALT, KC_LGUI, KC_LCTL,      /**/ TO(L_MOUSE), MO(L_SWITCH), KC_TRNS
     ),
     [L_SWITCH] = LAYOUT_split_3x6_3(
-        QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DF_QW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
-        KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        DF_EN_LGUISP, DF_UA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
+        QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DFQW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
+        KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        DFEN_LGUISP, DFUA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
         KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_NO,        KC_NO,  KC_NO, KC_NO,        KC_NO,
                                KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_TRNS,      KC_TRNS
     )
