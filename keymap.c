@@ -8,11 +8,12 @@
 #define L_UA_SPECIAL 5
 #define L_UA_SH 6
 #define L_CTL 7
-#define L_LGUI 8
-#define L_LAG 9
-#define L_MOUSE 10
-#define L_SYMBOL 11
-#define L_SWITCH 12
+#define L_ALT 8
+#define L_LGUI 9
+#define L_LAG 10
+#define L_MOUSE 11
+#define L_SYMBOL 12
+#define L_SWITCH 13
 
 #define HOT_EN 1
 #define HOT_QW 2*2*2
@@ -173,16 +174,16 @@ tap_dance_action_t tap_dance_actions[] = {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [L_EN] = LAYOUT_split_3x6_3(
-        KC_TAB,  KC_F, KC_P, KC_D,    KC_L,              KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
-        KC_ESC,  KC_S, KC_N, KC_T,    KC_H,              KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
-        KC_LSFT, KC_V, KC_W, KC_G,    KC_M,              KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
+        KC_TAB,  KC_F, KC_P, KC_D,    KC_L,                  KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
+        KC_ESC,  KC_S, KC_N, KC_T,    KC_H,                  KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
+        KC_LSFT, KC_V, KC_W, KC_G,    KC_M,                  KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
                              KC_LALT, TD(MO_ENSPECIAL_LGUI), KC_LCTL,  /**/  KC_R,            LT(L_EN_SH,KC_SPC), OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_NO,       KC_MPLY, KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-                                       MO(L_LAG), KC_TRNS,     MO(L_LGUI),    /**/ KC_NO, KC_LGUI, KC_NO
+        LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        KC_ESC,      KC_PSCR, KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        KC_NO,       KC_MPLY, KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+                                       MO(L_LAG), KC_TRNS,     MO(L_LGUI),    /**/ LSFT(KC_R), KC_LGUI, KC_NO
     ),
     [L_EN_SH] = LAYOUT_split_3x6_3(
         LSFT(KC_TAB), LSFT(KC_F), LSFT(KC_P), LSFT(KC_D), LSFT(KC_L), LSFT(KC_X), /**/ LSFT(KC_ENT),  LSFT(KC_U), LSFT(KC_O),    LSFT(KC_Y), LSFT(KC_B),    LSFT(KC_Z),
@@ -197,10 +198,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                     KC_LALT, LSFT_T(KC_LGUI), KC_LCTL, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
     ),
     [L_UA] = LAYOUT_split_3x6_3(
-        KC_TAB,  KC_LBRC, KC_U, KC_V,    KC_W,                  KC_I,      /**/ RCTL_T(KC_ENT), KC_E,               KC_J,   KC_B, KC_Q,    KC_SCLN,
-        KC_ESC,  KC_K,    KC_Y, KC_R,    KC_N,                  KC_L,      /**/ LCTL(KC_BSPC),  KC_F,               KC_T,   KC_S, KC_C,    KC_M,
-        KC_LSFT, KC_X,    KC_G, KC_D,    KC_P,                  KC_COMM,   /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_GRV, KC_Z, KC_RBRC, KC_A,
-                                KC_LALT, TD(MO_UASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
+        KC_TAB,  KC_LBRC, KC_U, KC_V,      KC_W,                  KC_I,      /**/ RCTL_T(KC_ENT), KC_E,               KC_J,   KC_B, KC_Q,    KC_SCLN,
+        KC_ESC,  KC_K,    KC_Y, KC_R,      KC_N,                  KC_L,      /**/ LCTL(KC_BSPC),  KC_F,               KC_T,   KC_S, KC_C,    KC_M,
+        KC_LSFT, KC_X,    KC_G, KC_D,      KC_P,                  KC_COMM,   /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_GRV, KC_Z, KC_RBRC, KC_A,
+                                MO(L_ALT), TD(MO_UASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), LSFT(KC_DOT), KC_NO,
@@ -219,6 +220,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL(KC_ESC), LCTL(KC_S), LCTL(KC_N), LCTL(KC_T), LCTL(KC_H), LCTL(KC_K), /**/ LCTL(KC_BSPC), LCTL(KC_A),   LCTL(KC_E),    LCTL(KC_I),   LCTL(KC_C),    LCTL(KC_Q),
         KC_NO,        LCTL(KC_V), LCTL(KC_W), LCTL(KC_G), LCTL(KC_M), LCTL(KC_J), /**/ LCTL(KC_COMM), LCTL(KC_DOT), LCTL(KC_QUOT), LCTL(KC_EQL), LCTL(KC_SCLN), LCTL(KC_SLSH),
                                               KC_LALT,    MO(L_LGUI), KC_TRNS,    /**/ LCTL(KC_R),    KC_RSFT,      KC_NO
+    ),
+    [L_ALT] = LAYOUT_split_3x6_3(
+        LALT(KC_TAB), LALT(KC_F), LALT(KC_P), LALT(KC_D), LALT(KC_L), LALT(KC_X), /**/ LALT(KC_ENT),  LALT(KC_U),   LALT(KC_O),    LALT(KC_Y),   LALT(KC_B),    LALT(KC_Z),
+        LALT(KC_ESC), LALT(KC_S), LALT(KC_N), LALT(KC_T), LALT(KC_H), LALT(KC_K), /**/ LALT(KC_BSPC), LALT(KC_A),   LALT(KC_E),    LALT(KC_I),   LALT(KC_C),    LALT(KC_Q),
+        KC_NO,        LALT(KC_V), LALT(KC_W), LALT(KC_G), LALT(KC_M), LALT(KC_J), /**/ LALT(KC_COMM), LALT(KC_DOT), LALT(KC_QUOT), LALT(KC_EQL), LALT(KC_SCLN), LALT(KC_SLSH),
+                                              KC_TRNS,    MO(L_LGUI), KC_LCTL,    /**/ LALT(KC_R),    KC_RSFT,      KC_NO
     ),
     [L_LGUI] = LAYOUT_split_3x6_3(
         LGUI(KC_TAB), LGUI(KC_F), LGUI(KC_P), LGUI(KC_D), LGUI(KC_L), LGUI(KC_X), /**/ LGUI(KC_ENT),  LGUI(KC_U),   LGUI(KC_O),    LGUI(KC_Y),   LGUI(KC_B),    LGUI(KC_Z),
