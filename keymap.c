@@ -220,21 +220,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                     KC_LALT, LSFT_T(KC_LGUI), KC_LCTL, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
     ),
     [L_UA] = LAYOUT_split_3x6_3(
-        KC_TAB,  KC_LBRC, KC_U, KC_V,      KC_W,                  KC_I,      /**/ RCTL_T(KC_ENT), KC_E,               KC_J,   KC_B, KC_Q,    KC_SCLN,
-        KC_ESC,  KC_K,    KC_Y, KC_R,      KC_N,                  KC_L,      /**/ LCTL(KC_BSPC),  KC_F,               KC_T,   KC_S, KC_C,    KC_M,
-        KC_LSFT, KC_X,    KC_G, KC_D,      KC_P,                  KC_COMM,   /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_GRV, KC_Z, KC_RBRC, KC_A,
+        KC_TAB,  KC_SCLN, KC_G, KC_L,      KC_X,                  KC_W,     /**/ RCTL_T(KC_ENT), KC_Z,               KC_J, KC_E, KC_A,    KC_I,
+        KC_ESC,  KC_C,    KC_Y, KC_N,      KC_R,                  KC_D,     /**/ LCTL(KC_BSPC),  KC_F,               KC_T, KC_S, KC_B,    KC_LBRC,
+        KC_LSFT, KC_P,    KC_U, KC_K,      KC_V,                  KC_COMM,  /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_Q, KC_M, KC_RBRC, KC_DOT,
                                 MO(L_ALT), TD(MOUASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), LSFT(KC_DOT), KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME,  KC_END,    KC_LEFT,       KC_UP,         /**/ KC_NO,      KC_QUOT,       KC_BSLS,       KC_O,       KC_DOT,       KC_AMPR,
-        KC_NO,       KC_MPLY, KC_MPRV,  KC_MNXT,   LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO,      KC_CIRC,       KC_NO,         KC_EQL,     KC_DLR,       RALT(KC_SLSH),
+        LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
+        KC_ESC,      KC_PSCR, KC_HOME,  KC_END,    KC_LEFT,       KC_UP,         /**/ KC_NO,      KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
+        KC_NO,       KC_MPLY, KC_MPRV,  KC_MNXT,   LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO,      LSFT(KC_2),  KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
                                         MO(L_LAG), KC_TRNS,       MO(L_LGUI),    /**/ LSFT(KC_H), KC_LGUI,       KC_NO
     ),
     [L_UA_SH] = LAYOUT_split_3x6_3(
-        LSFT(KC_TAB), LSFT(KC_LBRC), LSFT(KC_U), LSFT(KC_V), LSFT(KC_W), LSFT(KC_I),    /**/ LSFT(KC_ENT),  LSFT(KC_E), LSFT(KC_J), LSFT(KC_B), LSFT(KC_Q),    LSFT(KC_SCLN),
-        LSFT(KC_ESC), LSFT(KC_K),    LSFT(KC_Y), LSFT(KC_R), LSFT(KC_N), LSFT(KC_L),    /**/ LSFT(KC_BSPC), LSFT(KC_F), LSFT(KC_T), LSFT(KC_S), LSFT(KC_C),    LSFT(KC_M),
-        KC_NO,        LSFT(KC_X),    LSFT(KC_G), LSFT(KC_D), LSFT(KC_P), LSFT(KC_COMM), /**/ KC_NO,         KC_NO,      LSFT(KC_2), LSFT(KC_Z), LSFT(KC_RBRC), LSFT(KC_A),
+        LSFT(KC_TAB), LSFT(KC_SCLN), LSFT(KC_G), LSFT(KC_L), LSFT(KC_X), LSFT(KC_W),    /**/ LSFT(KC_ENT),  LSFT(KC_Z), LSFT(KC_J), LSFT(KC_E), LSFT(KC_A),    LSFT(KC_I),
+        LSFT(KC_ESC), LSFT(KC_C),    LSFT(KC_Y), LSFT(KC_N), LSFT(KC_R), LSFT(KC_D),    /**/ LSFT(KC_BSPC), LSFT(KC_F), LSFT(KC_T), LSFT(KC_S), LSFT(KC_B),    LSFT(KC_LBRC),
+        KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ KC_NO,         KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
                                                   KC_LALT,   KC_LGUI,    KC_LCTL,       /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_CTL] = LAYOUT_split_3x6_3(
