@@ -25,7 +25,7 @@ Better language switching:
 
 ![ukrainian layout](./img/ua.png)
 
-The secondary keys are available through the symbols layer
+The secondary keys are available through the special layer
 
 # Symbols layer
 
