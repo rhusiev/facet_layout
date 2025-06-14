@@ -13,9 +13,9 @@ Special treatment for symbols:
 Better language switching:
 - If Ctrl+Alt+1 and +2 are mapped to EN and UA layouts in the OS:
   - Switching layouts will also change language
-  - Using symbol layout will produce the same symbols both in UA and EN layouts
+  - Using symbol layer will produce the same symbols both in UA and EN layouts
 
-*Note*: as a bare Super (or Meta/Cmd/Win) key is used rarely, the key for it by default changes layout, when held. To press Super symbol once, double tap its key. To use Super+Key combination, hold the Special and Left Ctrl keys simultaneously.
+*Note*: as a bare Super (or Meta/Cmd/Win) key is used rarely, the key for it by default changes the layer to Symbols, when held. To press Super symbol once, double tap its key. To use Super+Key combination, hold the Special and Left Ctrl keys simultaneously.
 
 # English layout
 
@@ -25,21 +25,23 @@ Better language switching:
 
 ![ukrainian layout](./img/ua.png)
 
-# Symbols layout
+The secondary keys are available through the symbols layer
+
+# Symbols layer
 
 ![symbols layout](./img/symbols.png)
 
-# Special layout
+# Special layer
 
 ![special layout](./img/special.png)
 
-# Mouse layout
+# Mouse layer
 
 Do mouse actions using your keyboard
 
 ![mouse layout](./img/mouse.png)
 
-# Switch layout
+# Switch layer
 
 Switch layouts between Ukrainian, English and regular Qwerty
 

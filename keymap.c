@@ -210,7 +210,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [L_EN_SH] = LAYOUT_split_3x6_3(
         LSFT(KC_TAB), LSFT(KC_F), LSFT(KC_P), LSFT(KC_D), LSFT(KC_L), LSFT(KC_X), /**/ LSFT(KC_ENT),  LSFT(KC_U), LSFT(KC_O),    LSFT(KC_Y), LSFT(KC_B),    LSFT(KC_Z),
         LSFT(KC_ESC), LSFT(KC_S), LSFT(KC_N), LSFT(KC_T), LSFT(KC_H), LSFT(KC_K), /**/ LSFT(KC_BSPC), LSFT(KC_A), LSFT(KC_E),    LSFT(KC_I), LSFT(KC_C),    LSFT(KC_Q),
-        KC_NO,        LSFT(KC_V), LSFT(KC_W), LSFT(KC_G), LSFT(KC_M), LSFT(KC_J), /**/ KC_NO,         KC_NO,      LSFT(KC_QUOT), KC_NO,      LSFT(KC_SCLN), LSFT(KC_SLSH),
+        KC_NO,        LSFT(KC_V), LSFT(KC_W), LSFT(KC_G), LSFT(KC_M), LSFT(KC_J), /**/ LSFT(KC_R),    KC_NO,      LSFT(KC_QUOT), KC_NO,      LSFT(KC_SCLN), LSFT(KC_SLSH),
                                               KC_LALT,    KC_LGUI,    KC_LCTL,    /**/ LSFT(KC_R),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_QW] = LAYOUT_split_3x6_3(
@@ -234,7 +234,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [L_UA_SH] = LAYOUT_split_3x6_3(
         LSFT(KC_TAB), LSFT(KC_SCLN), LSFT(KC_G), LSFT(KC_L), LSFT(KC_X), LSFT(KC_W),    /**/ LSFT(KC_ENT),  LSFT(KC_Z), LSFT(KC_J), LSFT(KC_E), LSFT(KC_A),    LSFT(KC_I),
         LSFT(KC_ESC), LSFT(KC_C),    LSFT(KC_Y), LSFT(KC_N), LSFT(KC_R), LSFT(KC_D),    /**/ LSFT(KC_BSPC), LSFT(KC_F), LSFT(KC_T), LSFT(KC_S), LSFT(KC_B),    LSFT(KC_LBRC),
-        KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ KC_NO,         KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
+        KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ LSFT(KC_H),    KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
                                                   KC_LALT,   KC_LGUI,    KC_LCTL,       /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_CTL] = LAYOUT_split_3x6_3(
