@@ -4,16 +4,18 @@
 #define L_EN_SPECIAL 1
 #define L_EN_SH 2
 #define L_QW 3
-#define L_UA 4
-#define L_UA_SPECIAL 5
-#define L_UA_SH 6
-#define L_CTL 7
-#define L_ALT 8
-#define L_LGUI 9
-#define L_LAG 10
-#define L_MOUSE 11
-#define L_SYMBOL 12
-#define L_SWITCH 13
+#define L_GAME 4
+#define L_GAME1 5
+#define L_UA 6
+#define L_UA_SPECIAL 7
+#define L_UA_SH 8
+#define L_CTL 9
+#define L_ALT 10
+#define L_LGUI 11
+#define L_LAG 12
+#define L_MOUSE 13
+#define L_SYMBOL 14
+#define L_SWITCH 15
 
 #define HOT_EN 1
 #define HOT_QW 2*2*2
@@ -219,6 +221,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_RBRC,        KC_Z, KC_X, KC_C,    KC_V,            KC_B,    /**/ KC_N,    KC_M,           KC_COMM, KC_DOT, KC_SLSH, RCTL_T(KC_ENT),
                                     KC_LALT, LSFT_T(KC_LGUI), KC_LCTL, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
     ),
+    [L_GAME] = LAYOUT_split_3x6_3(
+        KC_LCTL, KC_T,    KC_Q, KC_W,        KC_E,   KC_R,    /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
+        KC_ESC,  KC_LSFT, KC_A, KC_S,        KC_D,   KC_F,    /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
+        KC_B,    KC_G,    KC_Z, KC_X,        KC_C,   KC_V,    /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
+                                MO(L_GAME1), KC_SPC, KC_LALT, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
+    ),
+    [L_GAME1] = LAYOUT_split_3x6_3(
+        KC_TAB, KC_Y,    KC_Q, KC_W,    KC_E,   KC_4,    /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
+        KC_ESC, KC_LSFT, KC_A, KC_S,    KC_D,   KC_5,    /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
+        KC_N,   KC_H,    KC_1, KC_2,    KC_3,   KC_6,    /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
+                               KC_TRNS, KC_SPC, KC_LALT, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
+    ),
     [L_UA] = LAYOUT_split_3x6_3(
         KC_TAB,  KC_SCLN, KC_G, KC_L,      KC_X,                  KC_W,     /**/ RCTL_T(KC_ENT), KC_Z,               KC_J, KC_E, KC_A,    KC_I,
         KC_ESC,  KC_C,    KC_Y, KC_N,      KC_R,                  KC_D,     /**/ LCTL(KC_BSPC),  KC_F,               KC_T, KC_S, KC_B,    KC_LBRC,
@@ -275,7 +289,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [L_SWITCH] = LAYOUT_split_3x6_3(
         QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DFQW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
-        KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        DFEN_LGUISP, DFUA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
+        KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DF(L_GAME),  DFEN_LGUISP, DFUA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
         KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_NO,        KC_NO,  KC_NO, KC_NO,        KC_NO,
                                KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_TRNS,      KC_TRNS
     )
