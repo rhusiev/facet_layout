@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include QMK_KEYBOARD_H
 
 #define L_EN 0
@@ -20,6 +21,46 @@
 #define HOT_EN 1
 #define HOT_QW 2*2*2
 #define HOT_UA 2*2*2*2
+
+bool modifier_active = false;
+const uint16_t ua_to_en_mapping[] = {
+    [KC_SCLN] = KC_F,
+    [KC_G] = KC_P,
+    [KC_L] = KC_D,
+    [KC_X] = KC_L,
+    [KC_W] = KC_X,
+    [KC_Z] = KC_U,
+    [KC_J] = KC_O,
+    [KC_E] = KC_Y,
+    [KC_A] = KC_B,
+    [KC_I] = KC_Z,
+    [KC_C] = KC_S,
+    [KC_Y] = KC_N,
+    [KC_N] = KC_T,
+    [KC_R] = KC_H,
+    [KC_D] = KC_K,
+    [KC_F] = KC_A,
+    [KC_T] = KC_E,
+    [KC_S] = KC_I,
+    [KC_B] = KC_C,
+    [KC_LBRC] = KC_Q,
+    [KC_P] = KC_V,
+    [KC_U] = KC_W,
+    [KC_K] = KC_G,
+    [KC_V] = KC_M,
+    [KC_COMM] = KC_J,
+    [KC_QUES] = KC_COMM,
+    [KC_SLSH] = KC_DOT,
+    [KC_Q] = KC_QUOT,
+    [KC_M] = KC_EQL,
+    [KC_RBRC] = KC_SCLN,
+    [KC_DOT] = KC_SLSH,
+    [KC_H] = KC_R,
+};
+bool is_key_mapped(uint16_t keycode) {
+    return keycode < ARRAY_SIZE(ua_to_en_mapping) && 
+           ua_to_en_mapping[keycode] != 0;
+}
 
 enum custom_keycodes {
     DFEN_LGUISP = SAFE_RANGE,
@@ -69,6 +110,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 unregister_code(KC_SPC);
             }
             return false;
+        default:
+            if (modifier_active) {
+                if (biton32(default_layer_state) == L_UA) {
+                    uint16_t base_keycode = keycode & 0xFF;
+                    uint16_t modifiers = keycode & 0xFF00;
+
+                    if (is_key_mapped(base_keycode)) {
+                        uint16_t mapped_base = ua_to_en_mapping[base_keycode];
+                        uint16_t final_keycode = modifiers | mapped_base;
+
+                        if (record->event.pressed) {
+                            register_code16(final_keycode);
+                        } else {
+                            unregister_code16(final_keycode);
+                        }
+                        return false;
+                    }
+                }
+            }
+            break;
     }
     return true;
 }
@@ -89,7 +150,8 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 
 enum td_keycodes {
     MOENSPECIAL_LGUI,
-    MOUASPECIAL_LGUI
+    MOUASPECIAL_LGUI,
+    LCTL_LALT,
 };
 typedef enum {
     TD_NONE,
@@ -107,6 +169,10 @@ static td_tap_t mo_enlsh_lgui_tap_state = {
     .state = TD_NONE
 };
 static td_tap_t mo_ualsh_lgui_tap_state = {
+    .is_press_action = true,
+    .state = TD_NONE
+};
+static td_tap_t lctl_lalt_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
@@ -150,6 +216,23 @@ void mo_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
             break;
     }
 }
+void lctl_lalt_finished(tap_dance_state_t *state, void *user_data) {
+    lctl_lalt_tap_state.state = cur_dance(state);
+    modifier_active = true;
+    switch (lctl_lalt_tap_state.state) {
+        case TD_SINGLE_TAP:
+            register_code(KC_LCTL);
+            break;
+        case TD_SINGLE_HOLD:
+            register_code(KC_LCTL);
+            break;
+        case TD_DOUBLE_TAP:
+            register_code(KC_LALT);
+            break;
+        default:
+            break;
+    }
+}
 void mo_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
     switch (mo_enlsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
@@ -182,6 +265,23 @@ void mo_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
     }
     mo_enlsh_lgui_tap_state.state = TD_NONE;
 }
+void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
+    modifier_active = false;
+    switch (lctl_lalt_tap_state.state) {
+        case TD_SINGLE_TAP:
+            unregister_code(KC_LCTL);
+            break;
+        case TD_SINGLE_HOLD:
+            unregister_code(KC_LCTL);
+            break;
+        case TD_DOUBLE_TAP:
+            unregister_code(KC_LALT);
+            break;
+        default:
+            break;
+    }
+    mo_enlsh_lgui_tap_state.state = TD_NONE;
+}
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
@@ -193,7 +293,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
 tap_dance_action_t tap_dance_actions[] = {
     [MOENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_enlsh_lgui_finished, mo_enlsh_lgui_reset),
-    [MOUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_ualsh_lgui_finished, mo_ualsh_lgui_reset)
+    [MOUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_ualsh_lgui_finished, mo_ualsh_lgui_reset),
+    [LCTL_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lctl_lalt_finished, lctl_lalt_reset),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -201,7 +302,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_F, KC_P, KC_D,    KC_L,                  KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
         KC_ESC,  KC_S, KC_N, KC_T,    KC_H,                  KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
         KC_LSFT, KC_V, KC_W, KC_G,    KC_M,                  KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
-                             KC_LALT, TD(MOENSPECIAL_LGUI), KC_LCTL,  /**/  KC_R,            LT(L_EN_SH,KC_SPC), OSL(L_SYMBOL)
+                             KC_SPC, TD(MOENSPECIAL_LGUI), TD(LCTL_LALT),  /**/  KC_R,            OSL(L_EN_SH), OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
@@ -213,31 +314,31 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LSFT(KC_TAB), LSFT(KC_F), LSFT(KC_P), LSFT(KC_D), LSFT(KC_L), LSFT(KC_X), /**/ LSFT(KC_ENT),  LSFT(KC_U), LSFT(KC_O),    LSFT(KC_Y), LSFT(KC_B),    LSFT(KC_Z),
         LSFT(KC_ESC), LSFT(KC_S), LSFT(KC_N), LSFT(KC_T), LSFT(KC_H), LSFT(KC_K), /**/ LSFT(KC_BSPC), LSFT(KC_A), LSFT(KC_E),    LSFT(KC_I), LSFT(KC_C),    LSFT(KC_Q),
         KC_NO,        LSFT(KC_V), LSFT(KC_W), LSFT(KC_G), LSFT(KC_M), LSFT(KC_J), /**/ LSFT(KC_R),    KC_NO,      LSFT(KC_QUOT), KC_NO,      LSFT(KC_SCLN), LSFT(KC_SLSH),
-                                              KC_LALT,    KC_LGUI,    KC_LCTL,    /**/ LSFT(KC_R),    KC_TRNS,    MO(L_SWITCH)
+                                              KC_SPC,    KC_LGUI,    TD(LCTL_LALT),    /**/ LSFT(KC_R),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_QW] = LAYOUT_split_3x6_3(
         LSFT_T(KC_TAB), KC_Q, KC_W, KC_E,    KC_R,            KC_T,    /**/ KC_Y,    KC_U,           KC_I,    KC_O,   KC_P,    KC_BSPC,
         KC_ESC,         KC_A, KC_S, KC_D,    KC_F,            KC_G,    /**/ KC_H,    KC_J,           KC_K,    KC_L,   KC_SCLN, KC_QUOT,
         KC_RBRC,        KC_Z, KC_X, KC_C,    KC_V,            KC_B,    /**/ KC_N,    KC_M,           KC_COMM, KC_DOT, KC_SLSH, RCTL_T(KC_ENT),
-                                    KC_LALT, LSFT_T(KC_LGUI), KC_LCTL, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
+                                    KC_SPC, LSFT_T(KC_LGUI), TD(LCTL_LALT), /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
     ),
     [L_GAME] = LAYOUT_split_3x6_3(
         KC_ESC,  KC_LALT, KC_Q, KC_W,   KC_E,    KC_R,        /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
         KC_LCTL, KC_2,    KC_A, KC_S,   KC_D,    KC_F,        /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
         KC_1,    KC_3,    KC_T, KC_G,   KC_B,    KC_C,        /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
-                             KC_SPC, KC_LSFT, MO(L_GAME1), /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
+                             KC_SPC, KC_LSFT, MO(L_GAME1), /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
     ),
     [L_GAME1] = LAYOUT_split_3x6_3(
         KC_ESC, KC_4, KC_F3, KC_W,   KC_F5,   KC_Y,    /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
         KC_TAB, KC_5, KC_A,  KC_S,   KC_D,    KC_H,    /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
         KC_M,   KC_6, KC_Z,  KC_X,   KC_V,    KC_N,    /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
-                             KC_SPC, KC_LSFT, KC_TRNS, /**/ KC_LBRC, RSFT_T(KC_SPC), OSL(L_SYMBOL)
+                             KC_SPC, KC_LSFT, KC_TRNS, /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
     ),
     [L_UA] = LAYOUT_split_3x6_3(
         KC_TAB,  KC_SCLN, KC_G, KC_L,      KC_X,                  KC_W,     /**/ RCTL_T(KC_ENT), KC_Z,               KC_J, KC_E, KC_A,    KC_I,
         KC_ESC,  KC_C,    KC_Y, KC_N,      KC_R,                  KC_D,     /**/ LCTL(KC_BSPC),  KC_F,               KC_T, KC_S, KC_B,    KC_LBRC,
         KC_LSFT, KC_P,    KC_U, KC_K,      KC_V,                  KC_COMM,  /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_Q, KC_M, KC_RBRC, KC_DOT,
-                                MO(L_ALT), TD(MOUASPECIAL_LGUI), MO(L_CTL), /**/ KC_H,           LT(L_UA_SH,KC_SPC), OSL(L_SYMBOL)
+                                KC_SPC, TD(MOUASPECIAL_LGUI), TD(LCTL_LALT), /**/ KC_H,           OSL(L_UA_SH), OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
@@ -249,19 +350,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LSFT(KC_TAB), LSFT(KC_SCLN), LSFT(KC_G), LSFT(KC_L), LSFT(KC_X), LSFT(KC_W),    /**/ LSFT(KC_ENT),  LSFT(KC_Z), LSFT(KC_J), LSFT(KC_E), LSFT(KC_A),    LSFT(KC_I),
         LSFT(KC_ESC), LSFT(KC_C),    LSFT(KC_Y), LSFT(KC_N), LSFT(KC_R), LSFT(KC_D),    /**/ LSFT(KC_BSPC), LSFT(KC_F), LSFT(KC_T), LSFT(KC_S), LSFT(KC_B),    LSFT(KC_LBRC),
         KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ LSFT(KC_H),    KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
-                                                  KC_LALT,   KC_LGUI,    KC_LCTL,       /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
-    ),
-    [L_CTL] = LAYOUT_split_3x6_3(
-        LCTL(KC_TAB), LCTL(KC_F), LCTL(KC_P), LCTL(KC_D), LCTL(KC_L), LCTL(KC_X), /**/ LCTL(KC_ENT),  LCTL(KC_U),   LCTL(KC_O),    LCTL(KC_Y),   LCTL(KC_B),    LCTL(KC_Z),
-        LCTL(KC_ESC), LCTL(KC_S), LCTL(KC_N), LCTL(KC_T), LCTL(KC_H), LCTL(KC_K), /**/ LCTL(KC_BSPC), LCTL(KC_A),   LCTL(KC_E),    LCTL(KC_I),   LCTL(KC_C),    LCTL(KC_Q),
-        KC_NO,        LCTL(KC_V), LCTL(KC_W), LCTL(KC_G), LCTL(KC_M), LCTL(KC_J), /**/ LCTL(KC_COMM), LCTL(KC_DOT), LCTL(KC_QUOT), LCTL(KC_EQL), LCTL(KC_SCLN), LCTL(KC_SLSH),
-                                              KC_LALT,    MO(L_LGUI), KC_TRNS,    /**/ LCTL(KC_R),    KC_RSFT,      KC_NO
-    ),
-    [L_ALT] = LAYOUT_split_3x6_3(
-        LALT(KC_TAB), LALT(KC_F), LALT(KC_P), LALT(KC_D), LALT(KC_L), LALT(KC_X), /**/ LALT(KC_ENT),  LALT(KC_U),   LALT(KC_O),    LALT(KC_Y),   LALT(KC_B),    LALT(KC_Z),
-        LALT(KC_ESC), LALT(KC_S), LALT(KC_N), LALT(KC_T), LALT(KC_H), LALT(KC_K), /**/ LALT(KC_BSPC), LALT(KC_A),   LALT(KC_E),    LALT(KC_I),   LALT(KC_C),    LALT(KC_Q),
-        KC_NO,        LALT(KC_V), LALT(KC_W), LALT(KC_G), LALT(KC_M), LALT(KC_J), /**/ LALT(KC_COMM), LALT(KC_DOT), LALT(KC_QUOT), LALT(KC_EQL), LALT(KC_SCLN), LALT(KC_SLSH),
-                                              KC_TRNS,    MO(L_LGUI), KC_LCTL,    /**/ LALT(KC_R),    KC_RSFT,      KC_NO
+                                                  KC_SPC,   KC_LGUI,    TD(LCTL_LALT),       /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_LGUI] = LAYOUT_split_3x6_3(
         LGUI(KC_TAB), LGUI(KC_F), LGUI(KC_P), LGUI(KC_D), LGUI(KC_L), LGUI(KC_X), /**/ LGUI(KC_ENT),  LGUI(KC_U),   LGUI(KC_O),    LGUI(KC_Y),   LGUI(KC_B),    LGUI(KC_Z),
@@ -279,13 +368,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_NO, KC_NO, KC_NO, MS_WHLU, MS_RGHT, MS_BTN2, /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
         KC_NO, KC_NO, KC_NO, MS_BTN3, MS_LEFT, MS_UP,   /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
         KC_NO, KC_NO, KC_NO, MS_WHLD, MS_BTN1, MS_DOWN, /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
-                             KC_NO,   KC_NO,   KC_NO,   /**/ KC_TRNS, KC_SPC, TG(L_MOUSE)
+                             KC_SPC,   KC_NO,   TD(LCTL_LALT),   /**/ KC_TRNS, KC_RSFT, TG(L_MOUSE)
     ),
     [L_SYMBOL] = LAYOUT_split_3x6_3(
         KC_GRV,  KC_ASTR, KC_UNDS, KC_LPRN, KC_RPRN, KC_BSLS,      /**/ KC_AMPR,     KC_7,         KC_8,    KC_9,    KC_HASH, KC_EXLM,
         KC_CIRC, KC_PLUS, KC_MINS, KC_LCBR, KC_RCBR, LCTL(KC_DEL), /**/ KC_BSPC,     KC_1,         KC_2,    KC_3,    KC_0,    KC_PIPE,
         KC_TILD, KC_LT,   KC_GT,   KC_LBRC, KC_RBRC, KC_DEL,       /**/ KC_DLR,      KC_4,         KC_5,    KC_6,    KC_PERC, KC_AT,
-                                   KC_LALT, KC_LGUI, KC_LCTL,      /**/ TO(L_MOUSE), MO(L_SWITCH), KC_TRNS
+                                   KC_SPC, KC_LGUI, TD(LCTL_LALT),      /**/ TO(L_MOUSE), MO(L_SWITCH), KC_TRNS
     ),
     [L_SWITCH] = LAYOUT_split_3x6_3(
         QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DFQW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
