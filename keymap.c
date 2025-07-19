@@ -23,7 +23,7 @@
 #define HOT_UA 2*2*2*2
 
 bool modifier_active = false;
-const uint16_t ua_to_en_mapping[] = {
+uint16_t ua_to_en_mapping[] = {
     [KC_SCLN] = KC_F,
     [KC_G] = KC_P,
     [KC_L] = KC_D,
@@ -61,6 +61,9 @@ bool is_key_mapped(uint16_t keycode) {
     return keycode < ARRAY_SIZE(ua_to_en_mapping) && 
            ua_to_en_mapping[keycode] != 0;
 }
+#define MAX_PRESSED_MAPPED_KEYS 16
+uint16_t pressed_mapped_keys[MAX_PRESSED_MAPPED_KEYS];
+uint8_t num_pressed_mapped_keys = 0;
 
 enum custom_keycodes {
     DFEN_LGUISP = SAFE_RANGE,
@@ -111,22 +114,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
         default:
-            if (modifier_active) {
-                if (biton32(default_layer_state) == L_UA) {
-                    uint16_t base_keycode = keycode & 0xFF;
-                    uint16_t modifiers = keycode & 0xFF00;
+            if (modifier_active && biton32(default_layer_state) == L_UA) {
+                uint16_t base_keycode = keycode & 0xFF;
+                uint16_t modifiers = keycode & 0xFF00;
 
-                    if (is_key_mapped(base_keycode)) {
-                        uint16_t mapped_base = ua_to_en_mapping[base_keycode];
-                        uint16_t final_keycode = modifiers | mapped_base;
+                if (is_key_mapped(base_keycode)) {
+                    uint16_t mapped = ua_to_en_mapping[base_keycode];
+                    uint16_t final_keycode = modifiers | mapped;
 
-                        if (record->event.pressed) {
-                            register_code16(final_keycode);
-                        } else {
-                            unregister_code16(final_keycode);
+                    if (record->event.pressed) {
+                        if (num_pressed_mapped_keys >= MAX_PRESSED_MAPPED_KEYS) {
+                            break;
                         }
-                        return false;
+                        register_code16(final_keycode);
+                        pressed_mapped_keys[num_pressed_mapped_keys++] = final_keycode;
+                    } else {
+                        unregister_code16(final_keycode);
+                        for (int i = 0; i < num_pressed_mapped_keys; i++) {
+                            if (pressed_mapped_keys[i] == final_keycode) {
+                                pressed_mapped_keys[i] = 0;
+                            }
+                        }
                     }
+                    return false;
                 }
             }
             break;
@@ -267,6 +277,10 @@ void mo_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
 }
 void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
     modifier_active = false;
+    for (int i = 0; i < num_pressed_mapped_keys; i++) {
+        unregister_code16(pressed_mapped_keys[i]);
+    }
+    num_pressed_mapped_keys = 0;
     switch (lctl_lalt_tap_state.state) {
         case TD_SINGLE_TAP:
             unregister_code(KC_LCTL);
