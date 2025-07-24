@@ -5,11 +5,11 @@
 #define L_EN_SPECIAL 1
 #define L_EN_SH 2
 #define L_QW 3
-#define L_GAME 4
-#define L_GAME1 5
-#define L_UA 6
-#define L_UA_SPECIAL 7
-#define L_UA_SH 8
+#define L_UA 4
+#define L_UA_SPECIAL 5
+#define L_UA_SH 6
+#define L_GAME 7
+#define L_GAME1 8
 #define L_CTL 9
 #define L_ALT 10
 #define L_LGUI 11
