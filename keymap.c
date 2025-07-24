@@ -159,8 +159,8 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 enum td_keycodes {
-    MOENSPECIAL_LGUI,
-    MOUASPECIAL_LGUI,
+    OSLENSPECIAL_LGUI,
+    OSLUASPECIAL_LGUI,
     LCTL_LALT,
 };
 typedef enum {
@@ -174,11 +174,11 @@ typedef struct {
     bool is_press_action;
     td_state_t state;
 } td_tap_t;
-static td_tap_t mo_enlsh_lgui_tap_state = {
+static td_tap_t osl_enlsh_lgui_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
-static td_tap_t mo_ualsh_lgui_tap_state = {
+static td_tap_t osl_ualsh_lgui_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
@@ -194,11 +194,11 @@ td_state_t cur_dance(tap_dance_state_t *state) {
     } else if (state->count == 2) return TD_DOUBLE_TAP;
     else return TD_UNKNOWN;
 }
-void mo_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
-    mo_enlsh_lgui_tap_state.state = cur_dance(state);
-    switch (mo_enlsh_lgui_tap_state.state) {
+void osl_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
+    osl_enlsh_lgui_tap_state.state = cur_dance(state);
+    switch (osl_enlsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            layer_on(L_EN_SPECIAL);
+            set_oneshot_layer(L_EN_SPECIAL, ONESHOT_START);
             break;
         case TD_SINGLE_HOLD:
             layer_on(L_EN_SPECIAL);
@@ -210,11 +210,11 @@ void mo_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
             break;
     }
 }
-void mo_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
-    mo_ualsh_lgui_tap_state.state = cur_dance(state);
-    switch (mo_ualsh_lgui_tap_state.state) {
+void osl_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
+    osl_ualsh_lgui_tap_state.state = cur_dance(state);
+    switch (osl_ualsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            layer_on(L_UA_SPECIAL);
+            set_oneshot_layer(L_UA_SPECIAL, ONESHOT_START);
             break;
         case TD_SINGLE_HOLD:
             layer_on(L_UA_SPECIAL);
@@ -243,10 +243,10 @@ void lctl_lalt_finished(tap_dance_state_t *state, void *user_data) {
             break;
     }
 }
-void mo_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
-    switch (mo_enlsh_lgui_tap_state.state) {
+void osl_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
+    switch (osl_enlsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            layer_off(L_EN_SPECIAL);
+            clear_oneshot_layer_state(ONESHOT_PRESSED);
             break;
         case TD_SINGLE_HOLD:
             layer_off(L_EN_SPECIAL);
@@ -257,12 +257,12 @@ void mo_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
         default:
             break;
     }
-    mo_enlsh_lgui_tap_state.state = TD_NONE;
+    osl_enlsh_lgui_tap_state.state = TD_NONE;
 }
-void mo_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
-    switch (mo_ualsh_lgui_tap_state.state) {
+void osl_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
+    switch (osl_ualsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            layer_off(L_UA_SPECIAL);
+            clear_oneshot_layer_state(ONESHOT_PRESSED);
             break;
         case TD_SINGLE_HOLD:
             layer_off(L_UA_SPECIAL);
@@ -273,7 +273,7 @@ void mo_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
         default:
             break;
     }
-    mo_enlsh_lgui_tap_state.state = TD_NONE;
+    osl_enlsh_lgui_tap_state.state = TD_NONE;
 }
 void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
     modifier_active = false;
@@ -294,7 +294,7 @@ void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
         default:
             break;
     }
-    mo_enlsh_lgui_tap_state.state = TD_NONE;
+    osl_enlsh_lgui_tap_state.state = TD_NONE;
 }
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
@@ -306,8 +306,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [MOENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_enlsh_lgui_finished, mo_enlsh_lgui_reset),
-    [MOUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mo_ualsh_lgui_finished, mo_ualsh_lgui_reset),
+    [OSLENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_enlsh_lgui_finished, osl_enlsh_lgui_reset),
+    [OSLUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_ualsh_lgui_finished, osl_ualsh_lgui_reset),
     [LCTL_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lctl_lalt_finished, lctl_lalt_reset),
 };
 
@@ -316,7 +316,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_F, KC_P, KC_D,    KC_L,                  KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
         KC_ESC,  KC_S, KC_N, KC_T,    KC_H,                  KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
         KC_LSFT, KC_V, KC_W, KC_G,    KC_M,                  KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
-                             KC_SPC, TD(MOENSPECIAL_LGUI), TD(LCTL_LALT),  /**/  KC_R,            OSL(L_EN_SH), OSL(L_SYMBOL)
+                             KC_SPC, TD(OSLENSPECIAL_LGUI), TD(LCTL_LALT),  /**/  KC_R,            OSL(L_EN_SH), OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
@@ -352,7 +352,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_SCLN, KC_G, KC_L,      KC_X,                  KC_W,     /**/ RCTL_T(KC_ENT), KC_Z,               KC_J, KC_E, KC_A,    KC_I,
         KC_ESC,  KC_C,    KC_Y, KC_N,      KC_R,                  KC_D,     /**/ LCTL(KC_BSPC),  KC_F,               KC_T, KC_S, KC_B,    KC_LBRC,
         KC_LSFT, KC_P,    KC_U, KC_K,      KC_V,                  KC_COMM,  /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_Q, KC_M, KC_RBRC, KC_DOT,
-                                KC_SPC, TD(MOUASPECIAL_LGUI), TD(LCTL_LALT), /**/ KC_H,           OSL(L_UA_SH), OSL(L_SYMBOL)
+                                KC_SPC, TD(OSLUASPECIAL_LGUI), TD(LCTL_LALT), /**/ KC_H,           OSL(L_UA_SH), OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
         LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
