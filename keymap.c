@@ -370,13 +370,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LGUI(KC_TAB), LGUI(KC_F), LGUI(KC_P), LGUI(KC_D), LGUI(KC_L), LGUI(KC_X), /**/ LGUI(KC_ENT),  LGUI(KC_U),   LGUI(KC_O),    LGUI(KC_Y),   LGUI(KC_B),    LGUI(KC_Z),
         LGUI(KC_ESC), LGUI(KC_S), LGUI(KC_N), LGUI(KC_T), LGUI(KC_H), LGUI(KC_K), /**/ LGUI(KC_BSPC), LGUI(KC_A),   LGUI(KC_E),    LGUI(KC_I),   LGUI(KC_C),    LGUI(KC_Q),
         KC_NO,        LGUI(KC_V), LGUI(KC_W), LGUI(KC_G), LGUI(KC_M), LGUI(KC_J), /**/ LGUI(KC_COMM), LGUI(KC_DOT), LGUI(KC_QUOT), LGUI(KC_EQL), LGUI(KC_SCLN), LGUI(KC_SLSH),
-                                              KC_NO,      KC_TRNS,    KC_TRNS,    /**/ LGUI(KC_R),    LGUI(KC_SPC), KC_RCTL
+                                              KC_NO,      KC_TRNS,    KC_TRNS,    /**/ LGUI(KC_R),    LGUI(KC_LSFT), KC_RCTL
     ),
     [L_LAG] = LAYOUT_split_3x6_3(
         LAG(KC_TAB), LAG(KC_F), LAG(KC_P), LAG(KC_D), LAG(KC_L), LAG(KC_X), /**/  LAG(KC_ENT),  LAG(KC_U),   LAG(KC_O),    LAG(KC_Y),   LAG(KC_B),    LAG(KC_Z),
         LAG(KC_ESC), LAG(KC_S), LAG(KC_N), LAG(KC_T), LAG(KC_H), LAG(KC_K), /**/  LAG(KC_BSPC), LAG(KC_A),   LAG(KC_E),    LAG(KC_I),   LAG(KC_C),    LAG(KC_Q),
         KC_NO,       LAG(KC_V), LAG(KC_W), LAG(KC_G), LAG(KC_M), LAG(KC_J), /**/  LAG(KC_COMM), LAG(KC_DOT), LAG(KC_QUOT), LAG(KC_EQL), LAG(KC_SCLN), LAG(KC_SLSH),
-                                           KC_TRNS,   KC_TRNS,    KC_NO,    /**/  LAG(KC_R),    LAG(KC_SPC), KC_RCTL
+                                           KC_TRNS,   KC_TRNS,    KC_NO,    /**/  LAG(KC_R),    LAG(KC_LSFT), KC_RCTL
     ),
     [L_MOUSE] = LAYOUT_split_3x6_3(
         KC_NO, KC_NO, KC_NO, MS_WHLU, MS_RGHT, MS_BTN2, /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
