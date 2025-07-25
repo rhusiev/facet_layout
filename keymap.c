@@ -159,8 +159,8 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 enum td_keycodes {
-    OSLENSPECIAL_LGUI,
-    OSLUASPECIAL_LGUI,
+    OSLENSH_LGUI,
+    OSLUASH_LGUI,
     LCTL_LALT,
 };
 typedef enum {
@@ -198,10 +198,10 @@ void osl_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
     osl_enlsh_lgui_tap_state.state = cur_dance(state);
     switch (osl_enlsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            set_oneshot_layer(L_EN_SPECIAL, ONESHOT_START);
+            set_oneshot_layer(L_EN_SH, ONESHOT_START);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(L_EN_SPECIAL);
+            layer_on(L_EN_SH);
             break;
         case TD_DOUBLE_TAP:
             register_code(KC_LGUI);
@@ -214,10 +214,10 @@ void osl_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
     osl_ualsh_lgui_tap_state.state = cur_dance(state);
     switch (osl_ualsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
-            set_oneshot_layer(L_UA_SPECIAL, ONESHOT_START);
+            set_oneshot_layer(L_UA_SH, ONESHOT_START);
             break;
         case TD_SINGLE_HOLD:
-            layer_on(L_UA_SPECIAL);
+            layer_on(L_UA_SH);
             break;
         case TD_DOUBLE_TAP:
             register_code(KC_LGUI);
@@ -249,7 +249,7 @@ void osl_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
             clear_oneshot_layer_state(ONESHOT_PRESSED);
             break;
         case TD_SINGLE_HOLD:
-            layer_off(L_EN_SPECIAL);
+            layer_off(L_EN_SH);
             break;
         case TD_DOUBLE_TAP:
             unregister_code(KC_LGUI);
@@ -265,7 +265,7 @@ void osl_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
             clear_oneshot_layer_state(ONESHOT_PRESSED);
             break;
         case TD_SINGLE_HOLD:
-            layer_off(L_UA_SPECIAL);
+            layer_off(L_UA_SH);
             break;
         case TD_DOUBLE_TAP:
             unregister_code(KC_LGUI);
@@ -306,8 +306,8 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [OSLENSPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_enlsh_lgui_finished, osl_enlsh_lgui_reset),
-    [OSLUASPECIAL_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_ualsh_lgui_finished, osl_ualsh_lgui_reset),
+    [OSLENSH_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_enlsh_lgui_finished, osl_enlsh_lgui_reset),
+    [OSLUASH_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, osl_ualsh_lgui_finished, osl_ualsh_lgui_reset),
     [LCTL_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, lctl_lalt_finished, lctl_lalt_reset),
 };
 
@@ -316,79 +316,79 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,  KC_F, KC_P, KC_D,    KC_L,                  KC_X,     /**/  RCTL_T(KC_ENT),  KC_U,                KC_O,    KC_Y,   KC_B,    KC_Z,
         KC_ESC,  KC_S, KC_N, KC_T,    KC_H,                  KC_K,     /**/  LCTL(KC_BSPC),   KC_A,                KC_E,    KC_I,   KC_C,    KC_Q,
         KC_LSFT, KC_V, KC_W, KC_G,    KC_M,                  KC_J,     /**/  RALT_T(KC_COMM), RSFT_T(KC_DOT),      KC_QUOT, KC_EQL, KC_SCLN, KC_SLSH,
-                             KC_SPC, TD(OSLENSPECIAL_LGUI), TD(LCTL_LALT),  /**/  KC_R,            OSL(L_EN_SH), OSL(L_SYMBOL)
+                             OSL(L_EN_SPECIAL), TD(OSLENSH_LGUI), TD(LCTL_LALT),  /**/  KC_R,            KC_SPC, OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_NO,       KC_MPLY, KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO,      KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-                                       MO(L_LAG), KC_TRNS,     MO(L_LGUI),    /**/ LSFT(KC_R), KC_LGUI, KC_NO
+        LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        KC_ESC,      KC_PSCR, KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        KC_NO,       KC_MPLY, KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+                                       KC_TRNS, KC_LGUI,       TD(LCTL_LALT), /**/ KC_NO, KC_SPC,  KC_NO
     ),
     [L_EN_SH] = LAYOUT_split_3x6_3(
         LSFT(KC_TAB), LSFT(KC_F), LSFT(KC_P), LSFT(KC_D), LSFT(KC_L), LSFT(KC_X), /**/ LSFT(KC_ENT),  LSFT(KC_U), LSFT(KC_O),    LSFT(KC_Y), LSFT(KC_B),    LSFT(KC_Z),
         LSFT(KC_ESC), LSFT(KC_S), LSFT(KC_N), LSFT(KC_T), LSFT(KC_H), LSFT(KC_K), /**/ LSFT(KC_BSPC), LSFT(KC_A), LSFT(KC_E),    LSFT(KC_I), LSFT(KC_C),    LSFT(KC_Q),
-        KC_NO,        LSFT(KC_V), LSFT(KC_W), LSFT(KC_G), LSFT(KC_M), LSFT(KC_J), /**/ LSFT(KC_R),    KC_NO,      LSFT(KC_QUOT), KC_NO,      LSFT(KC_SCLN), LSFT(KC_SLSH),
-                                              KC_SPC,    KC_LGUI,    TD(LCTL_LALT),    /**/ LSFT(KC_R),    KC_TRNS,    MO(L_SWITCH)
+        KC_NO,        LSFT(KC_V), LSFT(KC_W), LSFT(KC_G), LSFT(KC_M), LSFT(KC_J), /**/ KC_NO,         KC_NO,      LSFT(KC_QUOT), KC_NO,      LSFT(KC_SCLN), LSFT(KC_SLSH),
+                                              MO(L_LAG),  KC_TRNS,    MO(L_LGUI), /**/ LSFT(KC_R),    LSFT(KC_SPC), MO(L_SWITCH)
     ),
     [L_QW] = LAYOUT_split_3x6_3(
-        LSFT_T(KC_TAB), KC_Q, KC_W, KC_E,    KC_R,            KC_T,    /**/ KC_Y,    KC_U,           KC_I,    KC_O,   KC_P,    KC_BSPC,
-        KC_ESC,         KC_A, KC_S, KC_D,    KC_F,            KC_G,    /**/ KC_H,    KC_J,           KC_K,    KC_L,   KC_SCLN, KC_QUOT,
-        KC_RBRC,        KC_Z, KC_X, KC_C,    KC_V,            KC_B,    /**/ KC_N,    KC_M,           KC_COMM, KC_DOT, KC_SLSH, RCTL_T(KC_ENT),
-                                    KC_SPC, LSFT_T(KC_LGUI), TD(LCTL_LALT), /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
+        LSFT_T(KC_TAB), KC_Q, KC_W, KC_E,    KC_R,            KC_T,  /**/ KC_Y,    KC_U,   KC_I,    KC_O,   KC_P,    KC_BSPC,
+        KC_ESC,         KC_A, KC_S, KC_D,    KC_F,            KC_G,  /**/ KC_H,    KC_J,   KC_K,    KC_L,   KC_SCLN, KC_QUOT,
+        KC_RBRC,        KC_Z, KC_X, KC_C,    KC_V,            KC_B,  /**/ KC_N,    KC_M,   KC_COMM, KC_DOT, KC_SLSH, RCTL_T(KC_ENT),
+                                    KC_LGUI, KC_RSFT, TD(LCTL_LALT), /**/ KC_LBRC, KC_SPC, OSL(L_SYMBOL)
     ),
     [L_GAME] = LAYOUT_split_3x6_3(
         KC_ESC,  KC_LALT, KC_Q, KC_W,   KC_E,    KC_R,        /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
         KC_LCTL, KC_2,    KC_A, KC_S,   KC_D,    KC_F,        /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
         KC_1,    KC_3,    KC_T, KC_G,   KC_B,    KC_C,        /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
-                             KC_SPC, KC_LSFT, MO(L_GAME1), /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
+                             KC_SPC, KC_LSFT, MO(L_GAME1), /**/ KC_LBRC, KC_SPC, OSL(L_SYMBOL)
     ),
     [L_GAME1] = LAYOUT_split_3x6_3(
         KC_ESC, KC_4, KC_F3, KC_W,   KC_F5,   KC_Y,    /**/ KC_T,    KC_Y,           KC_U,           KC_I,    KC_O,   KC_P,
         KC_TAB, KC_5, KC_A,  KC_S,   KC_D,    KC_H,    /**/ KC_G,    KC_H,           KC_J,           KC_K,    KC_L,   KC_SCLN,
         KC_M,   KC_6, KC_Z,  KC_X,   KC_V,    KC_N,    /**/ KC_B,    KC_N,           KC_M,           KC_COMM, KC_DOT, KC_SLSH,
-                             KC_SPC, KC_LSFT, KC_TRNS, /**/ KC_LBRC, KC_RSFT, OSL(L_SYMBOL)
+                             KC_SPC, KC_LSFT, KC_TRNS, /**/ KC_LBRC, KC_SPC, OSL(L_SYMBOL)
     ),
     [L_UA] = LAYOUT_split_3x6_3(
         KC_TAB,  KC_SCLN, KC_G, KC_L,      KC_X,                  KC_W,     /**/ RCTL_T(KC_ENT), KC_Z,               KC_J, KC_E, KC_A,    KC_I,
         KC_ESC,  KC_C,    KC_Y, KC_N,      KC_R,                  KC_D,     /**/ LCTL(KC_BSPC),  KC_F,               KC_T, KC_S, KC_B,    KC_LBRC,
         KC_LSFT, KC_P,    KC_U, KC_K,      KC_V,                  KC_COMM,  /**/ KC_QUES,        RSFT_T(KC_SLSH),    KC_Q, KC_M, KC_RBRC, KC_DOT,
-                                KC_SPC, TD(OSLUASPECIAL_LGUI), TD(LCTL_LALT), /**/ KC_H,           OSL(L_UA_SH), OSL(L_SYMBOL)
+                                OSL(L_UA_SPECIAL), TD(OSLUASH_LGUI), TD(LCTL_LALT), /**/ KC_H,           KC_SPC, OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU,   KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO,      LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME,  KC_END,    KC_LEFT,       KC_UP,         /**/ KC_NO,      KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
-        KC_NO,       KC_MPLY, KC_MPRV,  KC_MNXT,   LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO,      LSFT(KC_2),  KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
-                                        MO(L_LAG), KC_TRNS,       MO(L_LGUI),    /**/ LSFT(KC_H), KC_LGUI,       KC_NO
+        LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
+        KC_ESC,      KC_PSCR, KC_HOME,  KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
+        KC_NO,       KC_MPLY, KC_MPRV,  KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, LSFT(KC_2),  KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
+                                        KC_TRNS, KC_LGUI,       TD(LCTL_LALT), /**/ KC_NO, KC_LGUI,       KC_NO
     ),
     [L_UA_SH] = LAYOUT_split_3x6_3(
         LSFT(KC_TAB), LSFT(KC_SCLN), LSFT(KC_G), LSFT(KC_L), LSFT(KC_X), LSFT(KC_W),    /**/ LSFT(KC_ENT),  LSFT(KC_Z), LSFT(KC_J), LSFT(KC_E), LSFT(KC_A),    LSFT(KC_I),
         LSFT(KC_ESC), LSFT(KC_C),    LSFT(KC_Y), LSFT(KC_N), LSFT(KC_R), LSFT(KC_D),    /**/ LSFT(KC_BSPC), LSFT(KC_F), LSFT(KC_T), LSFT(KC_S), LSFT(KC_B),    LSFT(KC_LBRC),
-        KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ LSFT(KC_H),    KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
-                                                  KC_SPC,   KC_LGUI,    TD(LCTL_LALT),       /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
+        KC_NO,        LSFT(KC_P),    LSFT(KC_U), LSFT(KC_K), LSFT(KC_V), LSFT(KC_COMM), /**/ KC_NO,         KC_NO,      LSFT(KC_Q), LSFT(KC_M), LSFT(KC_RBRC), LSFT(KC_DOT),
+                                                 MO(L_LAG),  KC_TRNS,    MO(L_LGUI),    /**/ LSFT(KC_H),    KC_TRNS,    MO(L_SWITCH)
     ),
     [L_LGUI] = LAYOUT_split_3x6_3(
         LGUI(KC_TAB), LGUI(KC_F), LGUI(KC_P), LGUI(KC_D), LGUI(KC_L), LGUI(KC_X), /**/ LGUI(KC_ENT),  LGUI(KC_U),   LGUI(KC_O),    LGUI(KC_Y),   LGUI(KC_B),    LGUI(KC_Z),
         LGUI(KC_ESC), LGUI(KC_S), LGUI(KC_N), LGUI(KC_T), LGUI(KC_H), LGUI(KC_K), /**/ LGUI(KC_BSPC), LGUI(KC_A),   LGUI(KC_E),    LGUI(KC_I),   LGUI(KC_C),    LGUI(KC_Q),
         KC_NO,        LGUI(KC_V), LGUI(KC_W), LGUI(KC_G), LGUI(KC_M), LGUI(KC_J), /**/ LGUI(KC_COMM), LGUI(KC_DOT), LGUI(KC_QUOT), LGUI(KC_EQL), LGUI(KC_SCLN), LGUI(KC_SLSH),
-                                              KC_NO,      KC_TRNS,    KC_TRNS,    /**/ LGUI(KC_R),    KC_RSFT,      KC_RCTL
+                                              KC_NO,      KC_TRNS,    KC_TRNS,    /**/ LGUI(KC_R),    LGUI(KC_SPC), KC_RCTL
     ),
     [L_LAG] = LAYOUT_split_3x6_3(
         LAG(KC_TAB), LAG(KC_F), LAG(KC_P), LAG(KC_D), LAG(KC_L), LAG(KC_X), /**/  LAG(KC_ENT),  LAG(KC_U),   LAG(KC_O),    LAG(KC_Y),   LAG(KC_B),    LAG(KC_Z),
         LAG(KC_ESC), LAG(KC_S), LAG(KC_N), LAG(KC_T), LAG(KC_H), LAG(KC_K), /**/  LAG(KC_BSPC), LAG(KC_A),   LAG(KC_E),    LAG(KC_I),   LAG(KC_C),    LAG(KC_Q),
         KC_NO,       LAG(KC_V), LAG(KC_W), LAG(KC_G), LAG(KC_M), LAG(KC_J), /**/  LAG(KC_COMM), LAG(KC_DOT), LAG(KC_QUOT), LAG(KC_EQL), LAG(KC_SCLN), LAG(KC_SLSH),
-                                           KC_TRNS,   KC_TRNS,    KC_NO,    /**/  LAG(KC_R),    KC_RSFT,     KC_RCTL
+                                           KC_TRNS,   KC_TRNS,    KC_NO,    /**/  LAG(KC_R),    LAG(KC_SPC), KC_RCTL
     ),
     [L_MOUSE] = LAYOUT_split_3x6_3(
         KC_NO, KC_NO, KC_NO, MS_WHLU, MS_RGHT, MS_BTN2, /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
         KC_NO, KC_NO, KC_NO, MS_BTN3, MS_LEFT, MS_UP,   /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
         KC_NO, KC_NO, KC_NO, MS_WHLD, MS_BTN1, MS_DOWN, /**/ KC_NO,   KC_NO,  KC_NO,      KC_NO, KC_NO, KC_NO,
-                             KC_SPC,   KC_NO,   TD(LCTL_LALT),   /**/ KC_TRNS, KC_RSFT, TG(L_MOUSE)
+                             KC_LGUI, KC_LSFT, TD(LCTL_LALT), /**/ KC_TRNS, KC_SPC, TG(L_MOUSE)
     ),
     [L_SYMBOL] = LAYOUT_split_3x6_3(
         KC_GRV,  KC_ASTR, KC_UNDS, KC_LPRN, KC_RPRN, KC_BSLS,      /**/ KC_AMPR,     KC_7,         KC_8,    KC_9,    KC_HASH, KC_EXLM,
         KC_CIRC, KC_PLUS, KC_MINS, KC_LCBR, KC_RCBR, LCTL(KC_DEL), /**/ KC_BSPC,     KC_1,         KC_2,    KC_3,    KC_0,    KC_PIPE,
         KC_TILD, KC_LT,   KC_GT,   KC_LBRC, KC_RBRC, KC_DEL,       /**/ KC_DLR,      KC_4,         KC_5,    KC_6,    KC_PERC, KC_AT,
-                                   KC_SPC, KC_LGUI, TD(LCTL_LALT),      /**/ TO(L_MOUSE), MO(L_SWITCH), KC_TRNS
+                                   KC_SPC,  KC_LSFT, TD(LCTL_LALT),/**/ TO(L_MOUSE), MO(L_SWITCH), KC_TRNS
     ),
     [L_SWITCH] = LAYOUT_split_3x6_3(
         QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DFQW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
