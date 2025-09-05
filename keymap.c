@@ -319,9 +319,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                              OSL(L_EN_SPECIAL), TD(OSLENSH_LGUI), TD(LCTL_LALT),  /**/  KC_R,            KC_SPC, OSL(L_SYMBOL)
     ),
     [L_EN_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
-        KC_NO,       KC_MPLY, KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        LALT(KC_F4), KC_MUTE,    KC_VOLD, KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_PSCR,
+        LCTL(KC_A),  LCTL(KC_C), KC_HOME, KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
+        LCTL(KC_Z),  KC_MPLY,    KC_MPRV, KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, KC_NO,   KC_NO,      KC_NO, KC_NO, KC_NO,
                                        KC_TRNS, KC_LGUI,       TD(LCTL_LALT), /**/ KC_NO, KC_SPC,  KC_NO
     ),
     [L_EN_SH] = LAYOUT_split_3x6_3(
@@ -355,9 +355,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 OSL(L_UA_SPECIAL), TD(OSLUASH_LGUI), TD(LCTL_LALT), /**/ KC_H,   KC_SPC,          OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE, KC_VOLD,  KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_NO,
-        KC_ESC,      KC_PSCR, KC_HOME,  KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
-        KC_NO,       KC_MPLY, KC_MPRV,  KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, LSFT(KC_2),    KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
+        LALT(KC_F4), KC_MUTE,    KC_VOLD,  KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_PSCR,
+        LCTL(KC_A),  LCTL(KC_C), KC_HOME,  KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
+        LCTL(KC_Z),  KC_MPLY,    KC_MPRV,  KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, LSFT(KC_2),    KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
                                         KC_TRNS, KC_LGUI,       TD(LCTL_LALT), /**/ KC_NO, KC_SPC,        KC_NO
     ),
     [L_UA_SH] = LAYOUT_split_3x6_3(
