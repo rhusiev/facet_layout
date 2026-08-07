@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include QMK_KEYBOARD_H
+#include "os_detection.h"
 
 #define L_EN 0
 #define L_EN_SPECIAL 1
@@ -18,12 +19,82 @@
 #define L_SYMBOL 14
 #define L_SWITCH 15
 
-#define HOT_EN 1
-#define HOT_QW 2*2*2
-#define HOT_UA 2*2*2*2
+enum custom_keycodes {
+    DFEN_LGUISP = SAFE_RANGE,
+    DFQW_LGUISP,
+    DFUA_LGUISP,
+};
 
-bool modifier_active = false;
-uint16_t ua_to_en_mapping[] = {
+static bool is_mac_host = false;
+static bool modifier_active = false;
+
+static void apply_host_os(void) {
+    keymap_config.swap_lctl_lgui = is_mac_host;
+    keymap_config.swap_rctl_rgui = is_mac_host;
+}
+
+bool process_detected_host_os_user(os_variant_t os) {
+    is_mac_host = (os == OS_MACOS || os == OS_IOS);
+    apply_host_os();
+    return true;
+}
+
+static uint16_t shortcut_mod(void) {
+    return is_mac_host ? KC_LGUI : KC_LCTL;
+}
+
+static uint16_t secondary_mod(void) {
+    return is_mac_host ? KC_LCTL : KC_LGUI;
+}
+
+typedef struct {
+    uint16_t from;
+    uint8_t  mods;
+    uint16_t to;
+} mac_override_t;
+
+static const mac_override_t mac_overrides[] = {
+    {KC_HOME,       MOD_LGUI,            KC_LEFT},
+    {KC_END,        MOD_LGUI,            KC_RGHT},
+    {LCTL(KC_LEFT), MOD_LALT,            KC_LEFT},
+    {LCTL(KC_RGHT), MOD_LALT,            KC_RGHT},
+    {LCTL(KC_BSPC), MOD_LALT,            KC_BSPC},
+    {LCTL(KC_DEL),  MOD_LALT,            KC_DEL},
+    {KC_PSCR,       MOD_LGUI | MOD_LSFT, KC_4},
+    {LALT(KC_F4),   MOD_LGUI,            KC_W},
+};
+
+static void hold_release(uint8_t mods, uint16_t keycode, bool pressed) {
+    if (pressed) {
+        if (mods) register_mods(mods);
+        if (keycode != KC_NO) register_code(keycode);
+    } else {
+        if (keycode != KC_NO) unregister_code(keycode);
+        if (mods) unregister_mods(mods);
+    }
+}
+
+static bool process_mac_remap(uint16_t keycode, keyrecord_t *record) {
+    if (!is_mac_host) return true;
+
+    for (uint8_t i = 0; i < ARRAY_SIZE(mac_overrides); i++) {
+        if (mac_overrides[i].from == keycode) {
+            hold_release(mac_overrides[i].mods, mac_overrides[i].to,
+                         record->event.pressed);
+            return false;
+        }
+    }
+
+    if (IS_QK_MODS(keycode) &&
+        QK_MODS_GET_MODS(keycode) == (MOD_LALT | MOD_LGUI)) {
+        hold_release(MOD_LGUI | MOD_LCTL, QK_MODS_GET_BASIC_KEYCODE(keycode),
+                     record->event.pressed);
+        return false;
+    }
+    return true;
+}
+
+static const uint16_t ua_to_en_mapping[] = {
     [KC_SCLN] = KC_F,
     [KC_G] = KC_P,
     [KC_L] = KC_D,
@@ -49,7 +120,6 @@ uint16_t ua_to_en_mapping[] = {
     [KC_K] = KC_G,
     [KC_V] = KC_M,
     [KC_COMM] = KC_J,
-    [KC_QUES] = KC_COMM,
     [KC_SLSH] = KC_DOT,
     [KC_Q] = KC_QUOT,
     [KC_M] = KC_EQL,
@@ -57,40 +127,122 @@ uint16_t ua_to_en_mapping[] = {
     [KC_DOT] = KC_SLSH,
     [KC_H] = KC_R,
 };
-bool is_key_mapped(uint16_t keycode) {
-    return keycode < ARRAY_SIZE(ua_to_en_mapping) && 
+
+static bool is_key_mapped(uint8_t keycode) {
+    return keycode < ARRAY_SIZE(ua_to_en_mapping) &&
            ua_to_en_mapping[keycode] != 0;
 }
-#define MAX_PRESSED_MAPPED_KEYS 16
-uint16_t pressed_mapped_keys[MAX_PRESSED_MAPPED_KEYS];
-uint8_t num_pressed_mapped_keys = 0;
 
-enum custom_keycodes {
-    DFEN_LGUISP = SAFE_RANGE,
-    DFQW_LGUISP,
-    DFUA_LGUISP
-};
-void switch_en(void) {
-    SEND_STRING(SS_LALT(SS_LCTL("1")));
+#define MAX_PRESSED_MAPPED_KEYS 8
+
+typedef struct {
+    keypos_t key;
+    uint16_t keycode;
+} mapped_key_t;
+
+static mapped_key_t pressed_mapped_keys[MAX_PRESSED_MAPPED_KEYS];
+static uint8_t num_pressed_mapped_keys = 0;
+
+static int8_t find_mapped_key(keypos_t key) {
+    for (uint8_t i = 0; i < num_pressed_mapped_keys; i++) {
+        if (pressed_mapped_keys[i].key.row == key.row &&
+            pressed_mapped_keys[i].key.col == key.col) {
+            return (int8_t)i;
+        }
+    }
+    return -1;
 }
-void switch_ua(void) {
-    SEND_STRING(SS_LALT(SS_LCTL("2")));
+
+// Releases are resolved from the table alone, never re-derived from the
+// current keycode or modifier state, so a key mapped on press is always
+// unmapped on release even if the layer or modifier changed in between.
+static bool process_ua_ctrl_remap(uint16_t keycode, keyrecord_t *record) {
+    if (!record->event.pressed) {
+        int8_t index = find_mapped_key(record->event.key);
+        if (index < 0) {
+            return true;
+        }
+        unregister_code16(pressed_mapped_keys[index].keycode);
+        pressed_mapped_keys[index] = pressed_mapped_keys[--num_pressed_mapped_keys];
+        return false;
+    }
+
+    if (is_mac_host || !modifier_active ||
+        biton32(default_layer_state) != L_UA ||
+        num_pressed_mapped_keys >= MAX_PRESSED_MAPPED_KEYS ||
+        keycode > QK_MODS_MAX) {
+        return true;
+    }
+
+    uint8_t base = keycode & 0xFF;
+    if (!is_key_mapped(base)) {
+        return true;
+    }
+
+    uint16_t final_keycode = (keycode & 0xFF00) | ua_to_en_mapping[base];
+    register_code16(final_keycode);
+    pressed_mapped_keys[num_pressed_mapped_keys++] = (mapped_key_t){
+        .key     = record->event.key,
+        .keycode = final_keycode,
+    };
+    return false;
 }
+
+#define LAYOUT_HOTKEY_MODS (MOD_LCTL | MOD_LALT)
+#define LAYOUT_SWITCH_WAIT_MS 40
+
+// Mods are cleared around the chord because SEND_STRING-style output adds to
+// the live modifier state rather than replacing it; a held shifted symbol such
+// as KC_DLR would otherwise corrupt it. Weak mods cover ACT_MODS keymap
+// entries, real mods cover a physically held KC_LSFT.
+//
+// register_mods bypasses mod_config, so this emits real Ctrl on macOS too,
+// which is what the host-side hotkey handler binds.
+//
+// The trailing wait stalls the scan loop until the host has plausibly applied
+// the new layout. There is no acknowledgment path, so without it a key pressed
+// immediately after the layer change is emitted under the old layout.
+static void send_layout_hotkey(uint16_t keycode) {
+    uint8_t saved_mods = get_mods();
+    uint8_t saved_weak_mods = get_weak_mods();
+
+    clear_mods();
+    clear_weak_mods();
+    send_keyboard_report();
+
+    register_mods(LAYOUT_HOTKEY_MODS);
+    tap_code(keycode);
+    unregister_mods(LAYOUT_HOTKEY_MODS);
+
+    set_mods(saved_mods);
+    set_weak_mods(saved_weak_mods);
+    send_keyboard_report();
+
+    wait_ms(LAYOUT_SWITCH_WAIT_MS);
+}
+
+static void switch_en(void) {
+    send_layout_hotkey(KC_1);
+}
+
+static void switch_ua(void) {
+    send_layout_hotkey(KC_2);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_mac_remap(keycode, record)) return false;
+
     switch (keycode) {
+        case OS_TOGG:
+            if (record->event.pressed) {
+                is_mac_host = !is_mac_host;
+                apply_host_os();
+            }
+            return false;
         case DFEN_LGUISP:
             if (record->event.pressed) {
                 switch_en();
-                // if (default_layer_state != HOT_EN && default_layer_state != HOT_QW) {
-                //     register_code(KC_LEFT_GUI);
-                //     register_code(KC_SPC);
-                //     unregister_code(KC_LEFT_GUI);
-                //     unregister_code(KC_SPC);
-                // }
                 set_single_default_layer(L_EN);
-            } else {
-                unregister_code(KC_LEFT_GUI);
-                unregister_code(KC_SPC);
             }
             return false;
         case DFQW_LGUISP:
@@ -101,60 +253,28 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case DFUA_LGUISP:
             if (record->event.pressed) {
                 switch_ua();
-                // if (default_layer_state != HOT_UA && default_layer_state != HOT_QW) {
-                //     register_code(KC_LEFT_GUI);
-                //     register_code(KC_SPC);
-                //     unregister_code(KC_LEFT_GUI);
-                //     unregister_code(KC_SPC);
-                // }
                 set_single_default_layer(L_UA);
-            } else {
-                unregister_code(KC_LEFT_GUI);
-                unregister_code(KC_SPC);
             }
             return false;
         default:
-            if (modifier_active && biton32(default_layer_state) == L_UA) {
-                uint16_t base_keycode = keycode & 0xFF;
-                uint16_t modifiers = keycode & 0xFF00;
-
-                if (is_key_mapped(base_keycode)) {
-                    uint16_t mapped = ua_to_en_mapping[base_keycode];
-                    uint16_t final_keycode = modifiers | mapped;
-
-                    if (record->event.pressed) {
-                        if (num_pressed_mapped_keys >= MAX_PRESSED_MAPPED_KEYS) {
-                            break;
-                        }
-                        register_code16(final_keycode);
-                        pressed_mapped_keys[num_pressed_mapped_keys++] = final_keycode;
-                    } else {
-                        unregister_code16(final_keycode);
-                        for (int i = 0; i < num_pressed_mapped_keys; i++) {
-                            if (pressed_mapped_keys[i] == final_keycode) {
-                                pressed_mapped_keys[i] = 0;
-                            }
-                        }
-                    }
-                    return false;
-                }
-            }
-            break;
+            return process_ua_ctrl_remap(keycode, record);
     }
-    return true;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    static uint8_t last_layer = L_EN;
-    uint8_t layer = get_highest_layer(state);
-    if (default_layer_state == HOT_UA) {
-        if (layer == L_SYMBOL) {
-            switch_en();
-        } else if (last_layer == L_SYMBOL) {
-            switch_ua();
+    static bool was_symbol_active = false;
+    bool is_symbol_active = (state & (1UL << L_SYMBOL)) != 0;
+
+    if (is_symbol_active != was_symbol_active) {
+        was_symbol_active = is_symbol_active;
+        if (biton32(default_layer_state) == L_UA) {
+            if (is_symbol_active) {
+                switch_en();
+            } else {
+                switch_ua();
+            }
         }
     }
-    last_layer = layer;
     return state;
 }
 
@@ -163,6 +283,7 @@ enum td_keycodes {
     OSLUASH_LGUI,
     LCTL_LALT,
 };
+
 typedef enum {
     TD_NONE,
     TD_UNKNOWN,
@@ -170,10 +291,12 @@ typedef enum {
     TD_SINGLE_HOLD,
     TD_DOUBLE_TAP
 } td_state_t;
+
 typedef struct {
     bool is_press_action;
     td_state_t state;
 } td_tap_t;
+
 static td_tap_t osl_enlsh_lgui_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
@@ -187,13 +310,14 @@ static td_tap_t lctl_lalt_tap_state = {
     .state = TD_NONE
 };
 
-td_state_t cur_dance(tap_dance_state_t *state) {
+static td_state_t cur_dance(tap_dance_state_t *state) {
     if (state->count == 1) {
         if (!state->pressed) return TD_SINGLE_TAP;
         else return TD_SINGLE_HOLD;
     } else if (state->count == 2) return TD_DOUBLE_TAP;
     else return TD_UNKNOWN;
 }
+
 void osl_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
     osl_enlsh_lgui_tap_state.state = cur_dance(state);
     switch (osl_enlsh_lgui_tap_state.state) {
@@ -204,12 +328,13 @@ void osl_enlsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
             layer_on(L_EN_SH);
             break;
         case TD_DOUBLE_TAP:
-            register_code(KC_LGUI);
+            register_code(secondary_mod());
             break;
         default:
             break;
     }
 }
+
 void osl_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
     osl_ualsh_lgui_tap_state.state = cur_dance(state);
     switch (osl_ualsh_lgui_tap_state.state) {
@@ -220,21 +345,20 @@ void osl_ualsh_lgui_finished(tap_dance_state_t *state, void *user_data) {
             layer_on(L_UA_SH);
             break;
         case TD_DOUBLE_TAP:
-            register_code(KC_LGUI);
+            register_code(secondary_mod());
             break;
         default:
             break;
     }
 }
+
 void lctl_lalt_finished(tap_dance_state_t *state, void *user_data) {
     lctl_lalt_tap_state.state = cur_dance(state);
     modifier_active = true;
     switch (lctl_lalt_tap_state.state) {
         case TD_SINGLE_TAP:
-            register_code(KC_LCTL);
-            break;
         case TD_SINGLE_HOLD:
-            register_code(KC_LCTL);
+            register_code(shortcut_mod());
             break;
         case TD_DOUBLE_TAP:
             register_code(KC_LALT);
@@ -243,6 +367,7 @@ void lctl_lalt_finished(tap_dance_state_t *state, void *user_data) {
             break;
     }
 }
+
 void osl_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
     switch (osl_enlsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
@@ -252,13 +377,14 @@ void osl_enlsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
             layer_off(L_EN_SH);
             break;
         case TD_DOUBLE_TAP:
-            unregister_code(KC_LGUI);
+            unregister_code(secondary_mod());
             break;
         default:
             break;
     }
     osl_enlsh_lgui_tap_state.state = TD_NONE;
 }
+
 void osl_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
     switch (osl_ualsh_lgui_tap_state.state) {
         case TD_SINGLE_TAP:
@@ -268,25 +394,20 @@ void osl_ualsh_lgui_reset(tap_dance_state_t *state, void *user_data) {
             layer_off(L_UA_SH);
             break;
         case TD_DOUBLE_TAP:
-            unregister_code(KC_LGUI);
+            unregister_code(secondary_mod());
             break;
         default:
             break;
     }
-    osl_enlsh_lgui_tap_state.state = TD_NONE;
+    osl_ualsh_lgui_tap_state.state = TD_NONE;
 }
+
 void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
     modifier_active = false;
-    for (int i = 0; i < num_pressed_mapped_keys; i++) {
-        unregister_code16(pressed_mapped_keys[i]);
-    }
-    num_pressed_mapped_keys = 0;
     switch (lctl_lalt_tap_state.state) {
         case TD_SINGLE_TAP:
-            unregister_code(KC_LCTL);
-            break;
         case TD_SINGLE_HOLD:
-            unregister_code(KC_LCTL);
+            unregister_code(shortcut_mod());
             break;
         case TD_DOUBLE_TAP:
             unregister_code(KC_LALT);
@@ -294,8 +415,9 @@ void lctl_lalt_reset(tap_dance_state_t *state, void *user_data) {
         default:
             break;
     }
-    osl_enlsh_lgui_tap_state.state = TD_NONE;
+    lctl_lalt_tap_state.state = TD_NONE;
 }
+
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case QK_TAP_DANCE ... QK_TAP_DANCE_MAX:
@@ -392,7 +514,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [L_SWITCH] = LAYOUT_split_3x6_3(
         QK_BOOT, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DFQW_LGUISP, KC_NO,        KC_NO,         KC_NO,        KC_NO, KC_NO,
-        KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DF(L_GAME),  DFEN_LGUISP, DFUA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
+        OS_TOGG, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ DF(L_GAME),  DFEN_LGUISP, DFUA_LGUISP,  LGUI(KC_SPC), KC_NO, KC_NO,
         KC_NO,   KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_NO,        KC_NO,  KC_NO, KC_NO,        KC_NO,
                                KC_NO, KC_NO, KC_NO, /**/ KC_NO,        KC_TRNS,      KC_TRNS
     )

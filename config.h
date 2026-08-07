@@ -1,3 +1,6 @@
 #pragma once
 
 #define DEBOUNCE 10
+
+#define OS_DETECTION_DEBOUNCE 250
+#define OS_DETECTION_SINGLE_REPORT
