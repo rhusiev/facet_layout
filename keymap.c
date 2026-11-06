@@ -23,6 +23,10 @@ enum custom_keycodes {
     DFEN_LGUISP = SAFE_RANGE,
     DFQW_LGUISP,
     DFUA_LGUISP,
+    UA_GHE,
+    UA_GHE_UPPER,
+    UA_APOSTROPHE,
+    UA_SLASH,
 };
 
 static bool is_mac_host = false;
@@ -256,9 +260,28 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 set_single_default_layer(L_UA);
             }
             return false;
+        case UA_GHE:
+            keycode = is_mac_host ? KC_GRV : KC_BSLS;
+            break;
+        case UA_GHE_UPPER:
+            keycode = is_mac_host ? S(KC_GRV) : S(KC_BSLS);
+            break;
+        case UA_APOSTROPHE:
+            keycode = is_mac_host ? KC_BSLS : KC_GRV;
+            break;
+        case UA_SLASH:
+            keycode = is_mac_host ? KC_PSLS : RALT(KC_SLSH);
+            break;
         default:
             return process_ua_ctrl_remap(keycode, record);
     }
+    if (!process_ua_ctrl_remap(keycode, record)) return false;
+    if (record->event.pressed) {
+        register_code16(keycode);
+    } else {
+        unregister_code16(keycode);
+    }
+    return false;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
@@ -477,9 +500,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 OSL(L_UA_SPECIAL), TD(OSLUASH_LGUI), TD(LCTL_LALT), /**/ KC_H,   KC_SPC,          OSL(L_SYMBOL)
     ),
     [L_UA_SPECIAL] = LAYOUT_split_3x6_3(
-        LALT(KC_F4), KC_MUTE,    KC_VOLD,  KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, LSFT(KC_QUOT), LSFT(KC_BSLS), LSFT(KC_O), KC_NO,    KC_PSCR,
-        LCTL(KC_A),  LCTL(KC_C), KC_HOME,  KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_QUOT,       KC_BSLS,       KC_O,       KC_CIRC,  KC_AMPR,
-        LCTL(KC_Z),  KC_MPLY,    KC_MPRV,  KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, LSFT(KC_2),    KC_GRV,        KC_EQL,     KC_DLR,   RALT(KC_SLSH),
+        LALT(KC_F4), KC_MUTE,    KC_VOLD,  KC_VOLU, KC_RGHT,       LCTL(KC_RGHT), /**/ KC_NO, LSFT(KC_QUOT), UA_GHE_UPPER, LSFT(KC_O), KC_NO,    KC_PSCR,
+        LCTL(KC_A),  LCTL(KC_C), KC_HOME,  KC_END,  KC_LEFT,       KC_UP,         /**/ KC_NO, KC_QUOT,       UA_GHE,       KC_O,       KC_CIRC,  KC_AMPR,
+        LCTL(KC_Z),  KC_MPLY,    KC_MPRV,  KC_MNXT, LCTL(KC_LEFT), KC_DOWN,       /**/ KC_NO, LSFT(KC_2),    UA_APOSTROPHE, KC_EQL,     KC_DLR,   UA_SLASH,
                                         KC_TRNS, KC_LGUI,       TD(LCTL_LALT), /**/ KC_NO, KC_SPC,        KC_NO
     ),
     [L_UA_SH] = LAYOUT_split_3x6_3(
